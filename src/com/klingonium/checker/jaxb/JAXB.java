@@ -1,7 +1,7 @@
 package com.klingonium.checker.jaxb;
 
-import com.klingonium.checker.data.Collection;
-import com.klingonium.checker.data.Series;
+import com.klingonium.checker.jaxb.data.Collection;
+import com.klingonium.checker.jaxb.data.Series;
 import org.apache.commons.lang3.StringUtils;
 
 import javax.xml.bind.JAXBContext;

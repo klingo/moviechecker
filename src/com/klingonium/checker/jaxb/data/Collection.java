@@ -1,4 +1,4 @@
-package com.klingonium.checker.data;
+package com.klingonium.checker.jaxb.data;
 
 import javax.xml.bind.annotation.*;
 import java.util.ArrayList;

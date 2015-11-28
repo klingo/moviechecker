@@ -1,15 +1,11 @@
 package com.klingonium.checker;
 
-import com.klingonium.checker.data.Collection;
-import com.klingonium.checker.data.Episode;
-import com.klingonium.checker.data.Season;
-import com.klingonium.checker.data.Series;
+import com.klingonium.checker.jaxb.data.Collection;
+import com.klingonium.checker.jaxb.data.Episode;
+import com.klingonium.checker.jaxb.data.Season;
+import com.klingonium.checker.jaxb.data.Series;
 import com.klingonium.checker.jaxb.JAXB;
-import org.apache.commons.lang3.StringUtils;
 
-import javax.xml.bind.JAXBContext;
-import javax.xml.bind.JAXBException;
-import javax.xml.bind.Marshaller;
 import java.util.Date;
 
 public class Main {
@@ -37,6 +33,11 @@ public class Main {
 
 		JAXB.marshal(coll);
 		JAXB.unmarshal("");
+
+		GUI gui = new GUI();
+
+		gui.setVisible(true);
+
 
 	}
 }
