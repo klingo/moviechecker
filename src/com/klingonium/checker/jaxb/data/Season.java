@@ -23,6 +23,10 @@ public class Season  {
 	public Season() {
 	}
 
+	public void addEpisode(Episode episode) {
+		getEpisodes().add(episode);
+	}
+
 	public List<Episode> getEpisodes() {
 		return episodes;
 	}

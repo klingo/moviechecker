@@ -19,10 +19,20 @@ public class Episode {
 
 	@XmlAttribute(name = "Number", required = true)
 	private int episodeNumber;
+	@XmlElement(name = "Title")
+	private String episodeTitle;
 	@XmlElement(name = "Quality")
 	private Quality quality;
 	@XmlElement(name = "Played")
 	private boolean played;
+
+	public String getEpisodeTitle() {
+		return episodeTitle;
+	}
+
+	public void setEpisodeTitle(String episodeTitle) {
+		this.episodeTitle = episodeTitle;
+	}
 
 	public Quality getQuality() {
 		return quality;

@@ -27,6 +27,10 @@ public class Series {
 		return name;
 	}
 
+	public void addSeason(Season season) {
+		getSeasons().add(season);
+	}
+
 	public List<Season> getSeasons() {
 		return seasons;
 	}

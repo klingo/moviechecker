@@ -2,6 +2,7 @@ package com.klingonium.checker.jaxb;
 
 import com.klingonium.checker.jaxb.data.Collection;
 import com.klingonium.checker.jaxb.data.Series;
+import com.klingonium.checker.utilities.Settings;
 import org.apache.commons.lang3.StringUtils;
 
 import javax.xml.bind.JAXBContext;
@@ -26,21 +27,23 @@ public class JAXB {
 
 			/* marshaling of java objects in xml */
 			jaxbMarshaller.marshal(coll, System.out);
-			jaxbMarshaller.marshal(coll, new File("G:/moviechecker.xml"));
+			jaxbMarshaller.marshal(coll, new File(Settings.getXMLFilePath()));
 		} catch (JAXBException e) {
 			e.printStackTrace();
 		}
 	}
 
-	public static void unmarshal(String xmlPath) {
-		xmlPath = StringUtils.defaultIfEmpty(xmlPath, "G:/moviechecker.xml");
+	public static Collection unmarshal() {
+		String xmlPath = Settings.getXMLFilePath();
+
+		Collection coll = null;
 
 		try {
 			/* init jaxb marshaller */
 			JAXBContext jaxbContext = JAXBContext.newInstance(Collection.class);
 			Unmarshaller jaxbUnmarshaller = jaxbContext.createUnmarshaller();
 
-			Collection coll = (Collection) jaxbUnmarshaller.unmarshal(new File(xmlPath));
+			coll = (Collection) jaxbUnmarshaller.unmarshal(new File(xmlPath));
 
 			for (Series series : coll.getSeries()) {
 				System.out.println(series.getName());
@@ -48,5 +51,7 @@ public class JAXB {
 		} catch (JAXBException e) {
 			e.printStackTrace();
 		}
+
+		return coll;
 	}
 }

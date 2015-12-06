@@ -35,6 +35,10 @@ public class Collection  {
 		this.lastCheck = lastCheck;
 	}
 
+	public void addSeries(Series series) {
+		getSeries().add(series);
+	}
+
 	public List<Series> getSeries() {
 		return series;
 	}
