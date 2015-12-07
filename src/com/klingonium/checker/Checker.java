@@ -12,6 +12,7 @@ import org.apache.commons.lang3.StringUtils;
 import java.io.File;
 import java.util.Date;
 import java.util.List;
+import java.util.ListIterator;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -20,32 +21,25 @@ import java.util.regex.Pattern;
  */
 public class Checker {
 
+	private final String REGEX_MAIN_PART = "([\\w.-]*)\\.S(\\d{2,4})E(\\d{2})[E-]?(\\d{2})?\\.(.*)";
+	private final String REGEX_END_PART1 = "(.*)\\.([01278p]{4,5})\\.(.*)\\.([aikmpv4]{3})";
+	private final String REGEX_END_PART2 = "(.*)()\\.([HSDTV.]{4,6})\\.([aikmpv4]{3})";
+	private final String REGEX_END_PART3 = "(.*)()()\\.([aikmpv4]{3})";
+	private final String REGEX_END_SRT = ".*(srt|nfo|nfo-orig)$";
+
 	public void doSomething() {
-		Collection coll = new Collection();
-		coll.setPath("G:/moviechecker.xml");
-		coll.setLastCheck(new Date());
-
-		Series series = new Series("Non Stop Power");
-		Season s1 = new Season(1);
-		Episode e1 = new Episode(1);
-		s1.getEpisodes().add(e1);
-
-		series.getSeasons().add(s1);
-
-		Series series2 = new Series("Everlasting Stopper");
-
-		coll.getSeries().add(series);
-		coll.getSeries().add(series2);
-
 //		JAXB.marshal(coll);
 //		JAXB.unmarshal("");
 
 		initCheck();
-		Collection collection = loadXMLFile();
+		Collection xmlCollection = loadXMLFile();
 
-		collection = initCollection();
+		Collection fileSystemCollection = initCollection();
 
-		saveXMLFile(collection);
+		Collection newEpisodesCollection = compareCollections(xmlCollection, fileSystemCollection);
+
+// this is problematic, fileSystemColleciton is handed over as a reference and therefore cna become empty after the cleanup!
+//		saveXMLFile(fileSystemCollection);
 
 //		GUI gui = new GUI();
 //		GUI2 gui = new GUI2();
@@ -75,20 +69,92 @@ public class Checker {
 				int intSeason = Integer.parseInt(strSeason);
 				Season season = new Season(intSeason);
 
-				for (File episodeFile : FileUtility.getSubfolderList(subFolder)) {
+				for (File episodeFile : FileUtility.getSubfolderFileList(subFolder)) {
 					String fileName = episodeFile.getName();
 
-//					The.Mentalist.S07E12E13.Brown.Shag.Carpet.and.White.Orchids
-//					The.Big.Bang.Theory.S07E03.The.Scavenger.Vortex.720p.HDTV
-
-					Pattern pattern = Pattern.compile("([a-zA-Z0-9.-]*)\\.S(\\d{2,4})E(\\d{2})E\\.([a-zA-Z0-9.-]*)\\.([pSHD.TV01278]{4,5})\\..*([aikmpv4]{3})");
+					Pattern pattern = Pattern.compile(REGEX_END_SRT, Pattern.MULTILINE);
 					Matcher matcher = pattern.matcher(fileName);
-					System.out.println(matcher.group());
 
-					Episode episode = new Episode(0);
-					episode.setEpisodeTitle(fileName);
+					if (matcher.matches()) {
+						// skip entry, since it's just a subtitle file
+						continue;
+					}
 
+					pattern = Pattern.compile(REGEX_MAIN_PART);
+					matcher = pattern.matcher(fileName);
+
+					String mTitle = StringUtils.EMPTY;
+					String mQuality = StringUtils.EMPTY;
+					String mType = StringUtils.EMPTY;
+					String mFileEnding = StringUtils.EMPTY;
+//					String mSeries = StringUtils.EMPTY;
+//					String mSeason = StringUtils.EMPTY;
+					String mEpisodeOne = StringUtils.EMPTY;
+					String mEpisodeTwo = StringUtils.EMPTY;
+					String remaining = StringUtils.EMPTY;
+
+					if (matcher.matches()) {
+//						mSeries = matcher.group(1);
+//						mSeason = matcher.group(2);
+						mEpisodeOne = matcher.group(3);
+						mEpisodeTwo = matcher.group(4);
+						remaining = matcher.group(5);
+
+						pattern = Pattern.compile(REGEX_END_PART1);
+						matcher = pattern.matcher(remaining);
+
+						if (matcher.matches()) {
+							mTitle = matcher.group(1);
+							mQuality = matcher.group(2);
+							mType = matcher.group(3);
+							mFileEnding = matcher.group(4);
+						} else {
+							pattern = Pattern.compile(REGEX_END_PART2);
+							matcher = pattern.matcher(remaining);
+
+							if (matcher.matches()) {
+								mTitle = matcher.group(1);
+								mQuality = matcher.group(2);
+								mType = matcher.group(3);
+								mFileEnding = matcher.group(4);
+							} else {
+								pattern = Pattern.compile(REGEX_END_PART3);
+								matcher = pattern.matcher(remaining);
+
+								if (matcher.matches()) {
+									mTitle = matcher.group(1);
+									mQuality = matcher.group(2);
+									mType = matcher.group(3);
+									mFileEnding = matcher.group(4);
+								} else {
+									System.err.println("Filename could not be correctly identified: " + fileName);
+								}
+							}
+						}
+					}
+
+					if (StringUtils.isEmpty(mEpisodeOne)) {
+						System.err.println("File without valid episode number: " + fileName);
+						continue;
+					}
+
+					Episode episode = new Episode(Integer.parseInt(mEpisodeOne));
+					episode.setEpisodeTitle(mTitle);
+					episode.setQuality(mQuality);
+					episode.setMediaType(mType);
+					episode.setFileType(mFileEnding);
+					episode.setPlayed(false);
 					season.addEpisode(episode);
+
+					if (StringUtils.isNotEmpty(mEpisodeTwo)) {
+						Episode episodeTwo = new Episode(Integer.parseInt(mEpisodeTwo));
+						episodeTwo.setEpisodeTitle(mTitle);
+						episodeTwo.setQuality(mQuality);
+						episodeTwo.setMediaType(mType);
+						episodeTwo.setFileType(mFileEnding);
+						episodeTwo.setPlayed(false);
+						season.addEpisode(episodeTwo);
+					}
 				}
 
 				series.addSeason(season);
@@ -100,7 +166,56 @@ public class Checker {
 			}
 		}
 
+		collection.setLastCheck(new Date());
+
 		return collection;
+	}
+
+
+	private Collection compareCollections(Collection xmlCollection, Collection fileSystemCollection) {
+
+		for (Series xmlSeries : xmlCollection.getSeries()) {
+
+			for (Series fileSeries : fileSystemCollection.getSeries()) {
+				if (xmlSeries.equals(fileSeries)) {
+
+					for (Season xmlSeason : xmlSeries.getSeasons()) {
+
+						for (Season fileSeason : fileSeries.getSeasons()) {
+							if (xmlSeason.equals(fileSeason)) {
+
+								for (Episode xmlEpisode : xmlSeason.getEpisodes()) {
+
+									for (Episode fileEpisode : fileSeason.getEpisodes()) {
+										if (xmlEpisode.equals(fileEpisode)) {
+											// Episode found!
+											fileSeason.getEpisodes().remove(fileEpisode);
+											break;
+										}
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+
+		// now do the cleanup!
+		for (int i = fileSystemCollection.getSeries().size() - 1; i >= 0; i--) {
+			Series fileSeries = fileSystemCollection.getSeries().get(i);
+			for (int j = fileSeries.getSeasons().size() - 1; j >= 0; j--) {
+				Season fileSeason = fileSeries.getSeasons().get(j);
+				if (fileSeason.getEpisodes().size() == 0) {
+					fileSeries.getSeasons().remove(fileSeason);
+				}
+			}
+			if (fileSeries.getSeasons().size() == 0) {
+				fileSystemCollection.getSeries().remove(fileSeries);
+			}
+		}
+
+		return fileSystemCollection;
 	}
 
 	private void initCheck() {

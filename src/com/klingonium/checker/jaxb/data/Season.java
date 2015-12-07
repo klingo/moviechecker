@@ -1,5 +1,7 @@
 package com.klingonium.checker.jaxb.data;
 
+import org.apache.commons.lang3.StringUtils;
+
 import javax.xml.bind.annotation.*;
 import java.util.ArrayList;
 import java.util.List;
@@ -33,5 +35,17 @@ public class Season  {
 
 	public void setEpisodes(List<Episode> episodes) {
 		this.episodes = episodes;
+	}
+
+	public int getSeasonNumber() {
+		return seasonNumber;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (obj instanceof Season) {
+			return StringUtils.equals(Integer.toString(getSeasonNumber()), Integer.toString(((Season) obj).getSeasonNumber()));
+		}
+		return super.equals(obj);
 	}
 }

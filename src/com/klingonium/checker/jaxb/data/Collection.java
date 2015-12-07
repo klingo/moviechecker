@@ -1,8 +1,11 @@
 package com.klingonium.checker.jaxb.data;
 
+import org.jetbrains.annotations.NotNull;
+
 import javax.xml.bind.annotation.*;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.Iterator;
 import java.util.List;
 
 /**
@@ -10,7 +13,7 @@ import java.util.List;
  */
 @XmlRootElement(name = "Collection")
 @XmlAccessorType(XmlAccessType.FIELD)
-public class Collection  {
+public class Collection {
 
 	@XmlElement(name = "Path")
 	private String path;
@@ -46,5 +49,4 @@ public class Collection  {
 	public void setSeries(List<Series> series) {
 		this.series = series;
 	}
-
 }

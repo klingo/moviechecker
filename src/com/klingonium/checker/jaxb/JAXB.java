@@ -26,7 +26,7 @@ public class JAXB {
 			jaxbMarshaller.setProperty(javax.xml.bind.Marshaller.JAXB_FORMATTED_OUTPUT, true);
 
 			/* marshaling of java objects in xml */
-			jaxbMarshaller.marshal(coll, System.out);
+//			jaxbMarshaller.marshal(coll, System.out);
 			jaxbMarshaller.marshal(coll, new File(Settings.getXMLFilePath()));
 		} catch (JAXBException e) {
 			e.printStackTrace();
@@ -44,10 +44,6 @@ public class JAXB {
 			Unmarshaller jaxbUnmarshaller = jaxbContext.createUnmarshaller();
 
 			coll = (Collection) jaxbUnmarshaller.unmarshal(new File(xmlPath));
-
-			for (Series series : coll.getSeries()) {
-				System.out.println(series.getName());
-			}
 		} catch (JAXBException e) {
 			e.printStackTrace();
 		}

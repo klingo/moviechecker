@@ -19,6 +19,11 @@ public class FileUtility {
 		return (List<File>) Arrays.asList(files);
 	}
 
+	public static List<File> getSubfolderFileList(File folder) {
+		File[] files = folder.listFiles();
+		return (List<File>) Arrays.asList(files);
+	}
+
 	public static File getSelectedFile(String title) {
 		return getSelectedObject(title, false);
 	}

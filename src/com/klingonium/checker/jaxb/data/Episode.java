@@ -1,5 +1,7 @@
 package com.klingonium.checker.jaxb.data;
 
+import org.apache.commons.lang3.StringUtils;
+
 import javax.xml.bind.annotation.*;
 
 /**
@@ -22,7 +24,11 @@ public class Episode {
 	@XmlElement(name = "Title")
 	private String episodeTitle;
 	@XmlElement(name = "Quality")
-	private Quality quality;
+	private String quality;
+	@XmlElement(name = "MediaType")
+	private String mediaType;
+	@XmlElement(name = "FileType")
+	private String fileType;
 	@XmlElement(name = "Played")
 	private boolean played;
 
@@ -34,12 +40,28 @@ public class Episode {
 		this.episodeTitle = episodeTitle;
 	}
 
-	public Quality getQuality() {
+	public String getQuality() {
 		return quality;
 	}
 
-	public void setQuality(Quality quality) {
+	public void setQuality(String quality) {
 		this.quality = quality;
+	}
+
+	public String getMediaType() {
+		return mediaType;
+	}
+
+	public void setMediaType(String mediaType) {
+		this.mediaType = mediaType;
+	}
+
+	public String getFileType() {
+		return fileType;
+	}
+
+	public void setFileType(String fileType) {
+		this.fileType = fileType;
 	}
 
 	public boolean isPlayed() {
@@ -48,5 +70,17 @@ public class Episode {
 
 	public void setPlayed(boolean played) {
 		this.played = played;
+	}
+
+	public int getEpisodeNumber() {
+		return episodeNumber;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (obj instanceof Episode) {
+			return StringUtils.equals(Integer.toString(getEpisodeNumber()), Integer.toString(((Episode) obj).getEpisodeNumber()));
+		}
+		return super.equals(obj);
 	}
 }
