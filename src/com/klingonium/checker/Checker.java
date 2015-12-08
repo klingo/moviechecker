@@ -24,7 +24,8 @@ public class Checker {
 	private final String REGEX_MAIN_PART = "([\\w.-]*)\\.S(\\d{2,4})E(\\d{2})[E-]?(\\d{2})?\\.(.*)";
 	private final String REGEX_END_PART1 = "(.*)\\.([01278p]{4,5})\\.(.*)\\.([aikmpv4]{3})";
 	private final String REGEX_END_PART2 = "(.*)()\\.([HSDTV.]{4,6})\\.([aikmpv4]{3})";
-	private final String REGEX_END_PART3 = "(.*)()()\\.([aikmpv4]{3})";
+	private final String REGEX_END_PART3 = "^([^720p].*)()()\\.([aikmpv4]{3})";
+	private final String REGEX_END_PART4 = "^()([01278p]{4,5})\\.(HDTV|HD.TV|WEB-DL|BluRay).*\\.([aikmpv4]{3})$";
 	private final String REGEX_END_SRT = ".*(srt|nfo|nfo-orig)$";
 
 	public void doSomething() {
@@ -36,10 +37,12 @@ public class Checker {
 
 		Collection fileSystemCollection = initCollection();
 
-		Collection newEpisodesCollection = compareCollections(xmlCollection, fileSystemCollection);
+		fileSystemCollection.removeDuplicatesFrom(xmlCollection);
+
+		xmlCollection.appendDataFrom(fileSystemCollection);
 
 // this is problematic, fileSystemColleciton is handed over as a reference and therefore cna become empty after the cleanup!
-//		saveXMLFile(fileSystemCollection);
+		saveXMLFile(xmlCollection);
 
 //		GUI gui = new GUI();
 //		GUI2 gui = new GUI2();
@@ -127,7 +130,17 @@ public class Checker {
 									mType = matcher.group(3);
 									mFileEnding = matcher.group(4);
 								} else {
-									System.err.println("Filename could not be correctly identified: " + fileName);
+									pattern = Pattern.compile(REGEX_END_PART4);
+									matcher = pattern.matcher(remaining);
+
+									if(matcher.matches()) {
+										mTitle = matcher.group(1);
+										mQuality = matcher.group(2);
+										mType = matcher.group(3);
+										mFileEnding = matcher.group(4);
+									} else {
+										System.err.println("Filename could not be correctly identified: " + fileName);
+									}
 								}
 							}
 						}
@@ -169,53 +182,6 @@ public class Checker {
 		collection.setLastCheck(new Date());
 
 		return collection;
-	}
-
-
-	private Collection compareCollections(Collection xmlCollection, Collection fileSystemCollection) {
-
-		for (Series xmlSeries : xmlCollection.getSeries()) {
-
-			for (Series fileSeries : fileSystemCollection.getSeries()) {
-				if (xmlSeries.equals(fileSeries)) {
-
-					for (Season xmlSeason : xmlSeries.getSeasons()) {
-
-						for (Season fileSeason : fileSeries.getSeasons()) {
-							if (xmlSeason.equals(fileSeason)) {
-
-								for (Episode xmlEpisode : xmlSeason.getEpisodes()) {
-
-									for (Episode fileEpisode : fileSeason.getEpisodes()) {
-										if (xmlEpisode.equals(fileEpisode)) {
-											// Episode found!
-											fileSeason.getEpisodes().remove(fileEpisode);
-											break;
-										}
-									}
-								}
-							}
-						}
-					}
-				}
-			}
-		}
-
-		// now do the cleanup!
-		for (int i = fileSystemCollection.getSeries().size() - 1; i >= 0; i--) {
-			Series fileSeries = fileSystemCollection.getSeries().get(i);
-			for (int j = fileSeries.getSeasons().size() - 1; j >= 0; j--) {
-				Season fileSeason = fileSeries.getSeasons().get(j);
-				if (fileSeason.getEpisodes().size() == 0) {
-					fileSeries.getSeasons().remove(fileSeason);
-				}
-			}
-			if (fileSeries.getSeasons().size() == 0) {
-				fileSystemCollection.getSeries().remove(fileSeries);
-			}
-		}
-
-		return fileSystemCollection;
 	}
 
 	private void initCheck() {

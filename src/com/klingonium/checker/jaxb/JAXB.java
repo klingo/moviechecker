@@ -2,13 +2,11 @@ package com.klingonium.checker.jaxb;
 
 import com.klingonium.checker.jaxb.data.Collection;
 import com.klingonium.checker.jaxb.data.Series;
+import com.klingonium.checker.utilities.FileUtility;
 import com.klingonium.checker.utilities.Settings;
 import org.apache.commons.lang3.StringUtils;
 
-import javax.xml.bind.JAXBContext;
-import javax.xml.bind.JAXBException;
-import javax.xml.bind.Marshaller;
-import javax.xml.bind.Unmarshaller;
+import javax.xml.bind.*;
 import java.io.File;
 
 /**
@@ -36,14 +34,21 @@ public class JAXB {
 	public static Collection unmarshal() {
 		String xmlPath = Settings.getXMLFilePath();
 
-		Collection coll = null;
+		Collection coll = new Collection();
 
 		try {
 			/* init jaxb marshaller */
 			JAXBContext jaxbContext = JAXBContext.newInstance(Collection.class);
 			Unmarshaller jaxbUnmarshaller = jaxbContext.createUnmarshaller();
 
-			coll = (Collection) jaxbUnmarshaller.unmarshal(new File(xmlPath));
+			File xmlFile = new File(xmlPath);
+
+			if (xmlFile.exists()) {
+				coll = (Collection) jaxbUnmarshaller.unmarshal(new File(xmlPath));
+			}
+		} catch (UnmarshalException e) {
+			// the file could not be read - assume it does not exist yet!
+			System.err.println(xmlPath + " could not be unmarshalled. File will be ignored.");
 		} catch (JAXBException e) {
 			e.printStackTrace();
 		}
