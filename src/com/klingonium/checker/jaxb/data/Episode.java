@@ -76,6 +76,12 @@ public class Episode {
 		return episodeNumber;
 	}
 
+	public String getFullEpisodeName() {
+		String episodeName = StringUtils.replace(getEpisodeTitle(), ".", StringUtils.SPACE);
+		String episodeNumber = StringUtils.leftPad(Integer.toString(getEpisodeNumber()), 2, "0");
+		return episodeNumber + ": " + episodeName;
+	}
+
 	@Override
 	public boolean equals(Object obj) {
 		if (obj instanceof Episode) {

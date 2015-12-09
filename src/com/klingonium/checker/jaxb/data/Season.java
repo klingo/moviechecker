@@ -41,6 +41,10 @@ public class Season  {
 		return seasonNumber;
 	}
 
+	public String getFullSeasonName() {
+		return "Season " + StringUtils.leftPad(Integer.toString(getSeasonNumber()), 2, "0");
+	}
+
 	@Override
 	public boolean equals(Object obj) {
 		if (obj instanceof Season) {

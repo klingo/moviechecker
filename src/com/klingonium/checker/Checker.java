@@ -189,7 +189,7 @@ public class Checker {
 		checkCollectionBasePath();
 	}
 
-	private Collection loadXMLFile() {
+	public Collection loadXMLFile() {
 		checkXmlPath();
 		return JAXB.unmarshal();
 	}
