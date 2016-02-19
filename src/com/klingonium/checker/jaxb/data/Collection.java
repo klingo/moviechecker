@@ -4,10 +4,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 
 import javax.xml.bind.annotation.*;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.Iterator;
-import java.util.List;
+import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -144,6 +141,44 @@ public class Collection {
 				System.out.println("INFO: Series added: " + otherSeries.getName());
 				addSeries(otherSeries);
 			}
+		}
+	}
+
+
+	public void sortCollection() {
+		// First sort all the series
+		Collections.sort(this.getSeries(), new SeriesComparator());
+
+		// Then, check the season for each series
+		for (int i = this.getSeries().size() - 1; i >= 0; i--) {
+			Series thisSeries = getSeries().get(i);
+			Collections.sort(thisSeries.getSeasons(), new SeasonComparator());
+
+			for (int j = thisSeries.getSeasons().size() - 1; j >= 0; j--) {
+				Season thisSeason = thisSeries.getSeasons().get(j);
+				Collections.sort(thisSeason.getEpisodes(), new EpisodeComparator());
+			}
+		}
+	}
+
+	private class SeriesComparator implements Comparator<Series> {
+		@Override
+		public int compare(Series series1, Series series2) {
+			return series1.getName().toUpperCase().compareTo(series2.getName().toUpperCase());
+		}
+	}
+
+	private class SeasonComparator implements Comparator<Season> {
+		@Override
+		public int compare(Season season1, Season season2) {
+			return Integer.compare(season1.getSeasonNumber(), season2.getSeasonNumber());
+		}
+	}
+
+	private class EpisodeComparator implements Comparator<Episode> {
+		@Override
+		public int compare(Episode episode1, Episode episode2) {
+			return Integer.compare(episode1.getEpisodeNumber(), episode2.getEpisodeNumber());
 		}
 	}
 }

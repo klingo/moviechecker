@@ -10,9 +10,7 @@ import com.klingonium.checker.utilities.Settings;
 import org.apache.commons.lang3.StringUtils;
 
 import java.io.File;
-import java.util.Date;
-import java.util.List;
-import java.util.ListIterator;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -41,11 +39,8 @@ public class Checker {
 
 		xmlCollection.appendDataFrom(fileSystemCollection);
 
-// this is problematic, fileSystemColleciton is handed over as a reference and therefore cna become empty after the cleanup!
+		// this is problematic, fileSystemCollection is handed over as a reference and therefore can become empty after the cleanup!
 		saveXMLFile(xmlCollection);
-
-//		GUI gui = new GUI();
-//		GUI2 gui = new GUI2();
 	}
 
 	private Collection initCollection() {
